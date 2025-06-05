@@ -1,5 +1,5 @@
 // personagem.go - Funções para movimentação e ações do personagem
-package main
+package cliente
 
 import "fmt"
 
@@ -7,10 +7,14 @@ import "fmt"
 func personagemMover(tecla rune, jogo *Jogo) {
 	dx, dy := 0, 0
 	switch tecla {
-	case 'w': dy = -1 // Move para cima
-	case 'a': dx = -1 // Move para a esquerda
-	case 's': dy = 1  // Move para baixo
-	case 'd': dx = 1  // Move para a direita
+	case 'w':
+		dy = -1 // Move para cima
+	case 'a':
+		dx = -1 // Move para a esquerda
+	case 's':
+		dy = 1 // Move para baixo
+	case 'd':
+		dx = 1 // Move para a direita
 	}
 
 	nx, ny := jogo.PosX+dx, jogo.PosY+dy
@@ -27,6 +31,30 @@ func personagemMover(tecla rune, jogo *Jogo) {
 func personagemInteragir(jogo *Jogo) {
 	// Atualmente apenas exibe uma mensagem de status
 	jogo.StatusMsg = fmt.Sprintf("Interagindo em (%d, %d)", jogo.PosX, jogo.PosY)
+
+	// posicoes para interação com o diamante
+
+	posicoes := [8][2]int{
+		{0, -1},  // cima
+		{0, 1},   // baixo
+		{-1, 0},  // esquerda
+		{1, 0},   // direita
+		{-1, -1}, // diagonal esquerda cima
+		{1, -1},  // diagonal direita cima
+		{-1, 1},  // diagonal esquerda baixo
+		{1, 1},   // diagonal direita baixo
+	}
+
+	for _, p := range posicoes {
+		nx, ny := jogo.PosX+p[0], jogo.PosY+p[1]
+
+		if ny >= 0 && ny < len(jogo.Mapa) && nx >= 0 && nx < len(jogo.Mapa[ny]) {
+			if jogo.Mapa[ny][nx] == Diamante {
+				jogo.StatusMsg = fmt.Sprintf("Bau interagido em (%d, %d)", nx, ny)
+				// implementar lógica de mandar para o servidor, e para terminar tem que receber.
+			}
+		}
+	}
 }
 
 // Processa o evento do teclado e executa a ação correspondente

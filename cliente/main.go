@@ -1,7 +1,10 @@
 // main.go - Loop principal do jogo
 package main
 
-import "os"
+import (
+	"jogo/cliente"
+	"os"
+)
 
 func main() {
 	// Inicializa a interface (termbox)

@@ -1,5 +1,5 @@
 // jogo.go - Funções para manipular os elementos do jogo, como carregar o mapa e mover o personagem
-package main
+package cliente
 
 import (
 	"bufio"
@@ -35,7 +35,7 @@ var (
 	Parede     = Elemento{'▤', CorParede, CorFundoParede, true}
 	Vegetacao  = Elemento{'♣', CorVerde, CorPadrao, false}
 	Vazio      = Elemento{' ', CorPadrao, CorPadrao, false}
-	Bau        = Elemento{'◆', CorAmarela, CorPadrao, true}
+	Diamante   = Elemento{'◆', CorAmarela, CorPadrao, true}
 )
 
 // Cria e retorna uma nova instância do jogo
@@ -67,8 +67,8 @@ func jogoCarregarMapa(nome string, jogo *Jogo) error {
 				e = Inimigo
 			case Vegetacao.simbolo:
 				e = Vegetacao
-			case Bau.simbolo:
-				e = Bau
+			case Diamante.simbolo:
+				e = Diamante
 			case Personagem.simbolo:
 				jogo.PosX, jogo.PosY = x, y // registra a posição inicial do personagem
 			}

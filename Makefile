@@ -7,7 +7,7 @@ go.mod:
 	go get -u github.com/nsf/termbox-go
 
 build: go.mod
-	go build -o jogo
+	go build -o cliente ./cliente
 	
 clean:
 	rm -f jogo
