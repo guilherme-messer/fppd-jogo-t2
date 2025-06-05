@@ -1,4 +1,4 @@
-package servidor
+package main
 
 type Jogo struct {
 	Jogadores           map[string]PosicaoJogador // a chave é o ID do jogador
@@ -14,6 +14,6 @@ func jogoNovo() Jogo {
 	return Jogo{DiamanteFoiColetado: false}
 }
 
-func ColetaDiamante() {
-
-}
+//func ColetaDiamante() {
+//
+//}

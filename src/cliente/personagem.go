@@ -1,5 +1,5 @@
 // personagem.go - Funções para movimentação e ações do personagem
-package cliente
+package main
 
 import "fmt"
 

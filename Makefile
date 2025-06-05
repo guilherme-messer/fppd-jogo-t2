@@ -1,16 +1,22 @@
-.PHONY: all build
+.PHONY: all build-cliente build-servidor clean distclean
 
-all: build
+BINARY_CLIENTE=cliente
+BINARY_SERVIDOR=servidor
+
+all: build-cliente build-servidor
 
 go.mod:
-	go mod init jogo
+	test -f go.mod || go mod init fppd-jogo-t2
 	go get -u github.com/nsf/termbox-go
 
-build: go.mod
-	go build -o cliente ./cliente
-	
+build-cliente:
+	go build -o $(BINARY_CLIENTE) ./src/cliente
+
+build-servidor:
+	go build -o $(BINARY_SERVIDOR) ./src/servidor
+
 clean:
-	rm -f jogo
+	rm -f $(BINARY_CLIENTE) $(BINARY_SERVIDOR)
 
 distclean: clean
 	rm -f go.mod go.sum
