@@ -15,7 +15,6 @@ func main() {
 		log.Fatalf("Erro ao registrar jogo RPC: %v", err)
 	}
 
-	// Escutar na porta 1234
 	ln, err := net.Listen("tcp", ":1234")
 	if err != nil {
 		log.Fatalf("Erro ao escutar: %v", err)

@@ -3,7 +3,11 @@ package main
 
 import (
 	"bufio"
+	"fmt"
+	"net/rpc"
 	"os"
+	"os/signal"
+	"syscall"
 )
 
 // Elemento representa qualquer objeto do mapa (parede, personagem, vegetação, etc)
@@ -20,7 +24,7 @@ type Jogo struct {
 	PosX, PosY          int          // posição atual do personagem
 	UltimoVisitado      Elemento     // elemento que estava na posição do personagem antes de mover
 	StatusMsg           string       // mensagem para a barra de status
-	Jogadores           []PosicaoJogadores
+	Jogadores           map[string]PosicaoJogadores
 	DiamanteFoiColetado bool
 }
 
@@ -29,14 +33,29 @@ type PosicaoJogadores struct {
 	PosX, PosY int
 }
 
+type RegistroInicial struct {
+	ID      string
+	Posicao PosicaoJogadores
+}
+
+// usada para encapsular o PosX, PosY do jogo, e o meuID
+// o net/rpc não aceita os argumentos soltos
+type Movimento struct {
+	ID string
+	X  int
+	Y  int
+}
+
 // Elementos visuais do jogo
 var (
-	Personagem = Elemento{'☺', CorCinzaEscuro, CorPadrao, true}
-	Inimigo    = Elemento{'☠', CorVermelho, CorPadrao, true}
-	Parede     = Elemento{'▤', CorParede, CorFundoParede, true}
-	Vegetacao  = Elemento{'♣', CorVerde, CorPadrao, false}
-	Vazio      = Elemento{' ', CorPadrao, CorPadrao, false}
-	Diamante   = Elemento{'◆', CorAmarela, CorPadrao, true}
+	Personagem       = Elemento{'☺', CorCinzaEscuro, CorPadrao, true}
+	Inimigo          = Elemento{'☠', CorVermelho, CorPadrao, true}
+	Parede           = Elemento{'▤', CorParede, CorFundoParede, true}
+	Vegetacao        = Elemento{'♣', CorVerde, CorPadrao, false}
+	Vazio            = Elemento{' ', CorPadrao, CorPadrao, false}
+	Diamante         = Elemento{'◆', CorAmarela, CorPadrao, true}
+	DiamanteColetado = Elemento{'◇', CorAmarela, CorPadrao, true}
+	OutrosJogadores  = Elemento{'☺', CorAmarela, CorPadrao, true}
 )
 
 // Cria e retorna uma nova instância do jogo
@@ -115,4 +134,32 @@ func jogoMoverElemento(jogo *Jogo, x, y, dx, dy int) {
 	jogo.Mapa[y][x] = jogo.UltimoVisitado   // restaura o conteúdo anterior
 	jogo.UltimoVisitado = jogo.Mapa[ny][nx] // guarda o conteúdo atual da nova posição
 	jogo.Mapa[ny][nx] = elemento            // move o elemento
+}
+
+func sincronizarDiamante(jogo *Jogo, cliente *rpc.Client) {
+	// Consulta o servidor para saber se o diamante já foi coletado
+	var foiColetado bool
+	err := cliente.Call("Jogo.GetDiamanteColetado", struct{}{}, &foiColetado)
+	if err != nil {
+		jogo.StatusMsg = fmt.Sprintf("Erro ao sincronizar diamante: %v", err)
+		return
+	}
+
+	// Se o cliente ainda não sabia que foi coletado, atualiza o mapa
+	if foiColetado && !jogo.DiamanteFoiColetado {
+		jogo.DiamanteFoiColetado = true
+		substituirDiamantePorColetado(jogo)
+	}
+}
+
+func capturarSinalSaida(cliente *rpc.Client, meuID string) {
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		<-c
+		var removido bool
+		cliente.Call("Jogo.RemoverJogador", meuID, &removido)
+		os.Exit(0)
+	}()
 }

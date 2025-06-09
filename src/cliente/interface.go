@@ -71,8 +71,12 @@ func interfaceDesenharJogo(jogo *Jogo) {
 	// Desenha o personagem sobre o mapa
 	interfaceDesenharElemento(jogo.PosX, jogo.PosY, Personagem)
 
-	for _, i := range jogo.Jogadores {
-		interfaceDesenharElemento(i.PosX, i.PosY, Personagem)
+	for _, pos := range jogo.Jogadores {
+		if pos.PosX == jogo.PosX && pos.PosY == jogo.PosY {
+			continue // para não desenhar o personagem do cliente
+		}
+
+		interfaceDesenharElemento(pos.PosX, pos.PosY, OutrosJogadores)
 	}
 
 	// Desenha a barra de status
@@ -108,5 +112,17 @@ func interfaceDesenharBarraDeStatus(jogo *Jogo) {
 	msg := "Use WASD para mover e E para interagir. ESC para sair."
 	for i, c := range msg {
 		termbox.SetCell(i, len(jogo.Mapa)+3, c, CorTexto, CorPadrao)
+	}
+}
+
+// substitui diamante preenchido por diamante vazio após coleta
+func substituirDiamantePorColetado(jogo *Jogo) {
+	for y := range jogo.Mapa {
+		for x := range jogo.Mapa[y] {
+			if jogo.Mapa[y][x] == Diamante {
+				jogo.Mapa[y][x] = DiamanteColetado
+				return // só existe um diamante
+			}
+		}
 	}
 }
