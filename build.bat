@@ -10,11 +10,11 @@ IF NOT EXIST go.mod (
 
 REM Compila cliente
 echo Compilando cliente...
-go build -o cliente.exe src\cliente
+go build -o cliente.exe .\src\cliente
 
 REM Compila servidor
 echo Compilando servidor...
-go build -o servidor.exe src\servidor
+go build -o servidor.exe .\src\servidor
 
 echo Build finalizado com sucesso.
 exit /b
