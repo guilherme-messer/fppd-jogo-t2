@@ -1,11 +1,18 @@
-// main.go - Loop principal do jogo
 package main
 
 import (
+	"log"
+	"net/rpc"
 	"os"
 )
 
 func main() {
+	// Conectar ao servidor
+	cliente, err := rpc.Dial("tcp", "localhost:1234")
+	if err != nil {
+		log.Fatalf("Erro ao conectar ao servidor RPC: %v", err)
+	}
+
 	// Inicializa a interface (termbox)
 	interfaceIniciar()
 	defer interfaceFinalizar()
@@ -16,7 +23,7 @@ func main() {
 		mapaFile = os.Args[1]
 	}
 
-	// Inicializa o jogo
+	// Inicializa o jogo local
 	jogo := jogoNovo()
 	if err := jogoCarregarMapa(mapaFile, &jogo); err != nil {
 		panic(err)
@@ -28,7 +35,7 @@ func main() {
 	// Loop principal de entrada
 	for {
 		evento := interfaceLerEventoTeclado()
-		if continuar := personagemExecutarAcao(evento, &jogo); !continuar {
+		if continuar := personagemExecutarAcao(evento, &jogo, cliente); !continuar {
 			break
 		}
 		interfaceDesenharJogo(&jogo)

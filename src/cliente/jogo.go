@@ -16,11 +16,12 @@ type Elemento struct {
 
 // Jogo contém o estado atual do jogo
 type Jogo struct {
-	Mapa           [][]Elemento // grade 2D representando o mapa
-	PosX, PosY     int          // posição atual do personagem
-	UltimoVisitado Elemento     // elemento que estava na posição do personagem antes de mover
-	StatusMsg      string       // mensagem para a barra de status
-	Jogadores      []PosicaoJogadores
+	Mapa                [][]Elemento // grade 2D representando o mapa
+	PosX, PosY          int          // posição atual do personagem
+	UltimoVisitado      Elemento     // elemento que estava na posição do personagem antes de mover
+	StatusMsg           string       // mensagem para a barra de status
+	Jogadores           []PosicaoJogadores
+	DiamanteFoiColetado bool
 }
 
 // Armazena posição dos jogadores

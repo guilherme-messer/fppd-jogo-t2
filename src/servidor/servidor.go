@@ -1,8 +1,13 @@
 package main
 
+import (
+	"sync"
+)
+
 type Jogo struct {
 	Jogadores           map[string]PosicaoJogador // a chave é o ID do jogador
 	DiamanteFoiColetado bool
+	mutex               sync.Mutex
 }
 
 type PosicaoJogador struct {
@@ -14,6 +19,21 @@ func jogoNovo() Jogo {
 	return Jogo{DiamanteFoiColetado: false}
 }
 
-//func ColetaDiamante() {
-//
-//}
+func (j *Jogo) ColetarDiamante(_ struct{}, reply *bool) error {
+	j.mutex.Lock()
+	defer j.mutex.Unlock()
+
+	if j.DiamanteFoiColetado {
+		*reply = false
+		return nil
+	}
+
+	j.DiamanteFoiColetado = true
+	*reply = true
+	return nil
+}
+
+func (j *Jogo) GetDiamanteColetado(_ struct{}, reply *bool) error {
+	*reply = j.DiamanteFoiColetado
+	return nil
+}
