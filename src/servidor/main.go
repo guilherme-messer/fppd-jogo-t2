@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"net/rpc"
+	"time"
 )
 
 func main() {
@@ -20,6 +21,23 @@ func main() {
 		log.Fatalf("Erro ao escutar: %v", err)
 	}
 	fmt.Println("Servidor ouvindo na porta 1234...")
+
+	// Go routine para remover clientes inativos, que não fizeram RPC
+	// na func Ping há mais de 10 segundos
+	go func() {
+		for {
+			jogo.mutex.Lock()
+			for id, ultimo := range jogo.UltimoPing {
+				if time.Since(ultimo) > 10*time.Second {
+					fmt.Printf("Jogador %s removido por inatividade\n", id)
+					delete(jogo.Jogadores, id)
+					delete(jogo.UltimoPing, id)
+				}
+			}
+			jogo.mutex.Unlock()
+			time.Sleep(5 * time.Second)
+		}
+	}()
 
 	for {
 		conn, err := ln.Accept()

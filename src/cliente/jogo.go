@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/rpc"
 	"os"
+	"sync"
 	"time"
 )
 
@@ -152,13 +153,16 @@ func sincronizarDiamante(jogo *Jogo, cliente *rpc.Client) {
 	}
 }
 
-func pingServidor(cliente *rpc.Client, meuID string, ultimoPing *time.Time) {
+func pingServidor(cliente *rpc.Client, meuID string, ultimoPing *time.Time, done chan struct{}, fecharOnce *sync.Once) {
 	if time.Since(*ultimoPing) >= 5*time.Second {
 		var pong bool
 		err := cliente.Call("Jogo.Ping", meuID, &pong)
 		if err != nil || !pong {
 			log.Println("Servidor não respondeu ao ping. Encerrando cliente.")
-			os.Exit(1)
+			fecharOnce.Do(func() {
+				close(done)
+			})
+			return
 		}
 		*ultimoPing = time.Now()
 	}

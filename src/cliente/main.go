@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/rpc"
 	"os"
+	"sync"
 	"time"
 )
 
@@ -53,6 +54,7 @@ func main() {
 
 	// Canal para encerrar goroutines ao sair
 	done := make(chan struct{})
+	var fecharOnce sync.Once
 
 	// Goroutine para sincronizar jogadores e diamante periodicamente
 	go func() {
@@ -78,7 +80,7 @@ func main() {
 				interfaceDesenharJogo(&jogo)
 
 				// Faz o ping para o servidor
-				pingServidor(cliente, meuID, &ultimoPing)
+				pingServidor(cliente, meuID, &ultimoPing, done, &fecharOnce)
 
 				time.Sleep(50 * time.Millisecond)
 			}
@@ -91,7 +93,9 @@ func main() {
 		if continuar := personagemExecutarAcao(evento, &jogo, cliente, meuID); !continuar {
 			var removido bool
 			_ = cliente.Call("Jogo.RemoverJogador", meuID, &removido)
-			close(done)
+			fecharOnce.Do(func() {
+				close(done)
+			})
 			break
 		}
 	}

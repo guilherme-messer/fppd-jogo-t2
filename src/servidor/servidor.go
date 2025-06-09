@@ -3,10 +3,12 @@ package main
 import (
 	"fmt"
 	"sync"
+	"time"
 )
 
 type Jogo struct {
 	Jogadores           map[string]PosicaoJogador // a chave é o ID do jogador
+	UltimoPing          map[string]time.Time
 	DiamanteFoiColetado bool
 	idJogadores         int
 	mutex               sync.Mutex
@@ -29,6 +31,7 @@ type Movimento struct {
 func jogoNovo() Jogo {
 	return Jogo{
 		Jogadores:           make(map[string]PosicaoJogador),
+		UltimoPing:          make(map[string]time.Time),
 		DiamanteFoiColetado: false,
 	}
 }
@@ -128,6 +131,20 @@ func (j *Jogo) RemoverJogador(id string, resposta *bool) error {
 	defer j.mutex.Unlock()
 
 	delete(j.Jogadores, id)
+	delete(j.UltimoPing, id)
 	*resposta = true
+	return nil
+}
+
+func (j *Jogo) Ping(id string, reply *bool) error {
+	j.mutex.Lock()
+	defer j.mutex.Unlock()
+
+	if _, ok := j.Jogadores[id]; ok {
+		j.UltimoPing[id] = time.Now()
+		*reply = true
+		return nil
+	}
+	*reply = false
 	return nil
 }
