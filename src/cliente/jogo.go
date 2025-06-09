@@ -4,10 +4,10 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"net/rpc"
 	"os"
-	"os/signal"
-	"syscall"
+	"time"
 )
 
 // Elemento representa qualquer objeto do mapa (parede, personagem, vegetação, etc)
@@ -152,14 +152,14 @@ func sincronizarDiamante(jogo *Jogo, cliente *rpc.Client) {
 	}
 }
 
-func capturarSinalSaida(cliente *rpc.Client, meuID string) {
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
-
-	go func() {
-		<-c
-		var removido bool
-		cliente.Call("Jogo.RemoverJogador", meuID, &removido)
-		os.Exit(0)
-	}()
+func pingServidor(cliente *rpc.Client, meuID string, ultimoPing *time.Time) {
+	if time.Since(*ultimoPing) >= 5*time.Second {
+		var pong bool
+		err := cliente.Call("Jogo.Ping", meuID, &pong)
+		if err != nil || !pong {
+			log.Println("Servidor não respondeu ao ping. Encerrando cliente.")
+			os.Exit(1)
+		}
+		*ultimoPing = time.Now()
+	}
 }

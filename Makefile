@@ -9,10 +9,10 @@ go.mod:
 	test -f go.mod || go mod init fppd-jogo-t2
 	go get -u github.com/nsf/termbox-go
 
-build-cliente:
+build-cliente: go.mod
 	go build -o $(BINARY_CLIENTE) ./src/cliente
 
-build-servidor:
+build-servidor: go.mod
 	go build -o $(BINARY_SERVIDOR) ./src/servidor
 
 clean:
