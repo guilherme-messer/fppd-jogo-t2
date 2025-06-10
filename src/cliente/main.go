@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/rpc"
 	"os"
@@ -9,8 +10,13 @@ import (
 )
 
 func main() {
+	var ip string
+	fmt.Println("Digite o IP:")
+	fmt.Scanln(&ip)
+	ip = ip + ":1234"
+
 	// Conectar ao servidor
-	cliente, err := rpc.Dial("tcp", "localhost:1234")
+	cliente, err := rpc.Dial("tcp", ip)
 	if err != nil {
 		log.Fatalf("Erro ao conectar ao servidor RPC: %v", err)
 	}
